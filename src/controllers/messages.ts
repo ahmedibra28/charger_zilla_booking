@@ -1,4 +1,4 @@
-import { MessageData } from '../types/socket'
+import { MessageData } from '../types'
 import { Socket } from 'socket.io'
 
 export const messages = {
