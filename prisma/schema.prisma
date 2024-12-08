@@ -1,0 +1,365 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model blog {
+  id         Int       @id @default(autoincrement())
+  text       String
+  image      String?
+  link       String?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model charger_types {
+  id                Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(255)
+  iconname          String?             @db.VarChar(50)
+  station_iconname  String?
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations[]
+}
+
+model charging_stations {
+  id                   Int                    @id @default(autoincrement())
+  station_name         String?                @db.VarChar(255)
+  street_address       String?                @db.VarChar(255)
+  city_id              Int?
+  station_image        String?                @db.VarChar(80)
+  zipcode_id           Int?
+  phone                String?                @db.VarChar(255)
+  Availability         String?                @db.VarChar(255)
+  total_no_of_ports    Int?
+  level                String?
+  chademo              Int?                   @default(0)
+  j1772                Int?                   @default(0)
+  ccs                  Int?                   @default(0)
+  tesla                Int?                   @default(0)
+  ccs_power            Int?
+  chademo_power        Int?
+  j1772_power          Int?
+  tesla_power          Int?
+  network_type_id      Int?
+  latitude             Float?
+  longitude            Float?
+  facility_type_id     Int?
+  pricing              String?                @db.VarChar(255)
+  image_id             Int?
+  map_image_id         Int?
+  charger_id           Int?
+  online               Boolean?
+  created_at           DateTime?              @default(now())
+  updated_at           DateTime?              @default(now())
+  deleted_at           DateTime?
+  countryId            Int?
+  equipment            Int?
+  access               String?                @db.VarChar(255)
+  nema1450             Int?
+  nema515              Int?
+  nema520              Int?
+  charger_types        charger_types?         @relation(fields: [charger_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  cities               cities?                @relation(fields: [city_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  countries            countries?             @relation(fields: [countryId], references: [id])
+  facility_types       facility_types?        @relation(fields: [facility_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  icon_types           icon_types?            @relation(fields: [image_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  map_icon_types       map_icon_types?        @relation(fields: [map_image_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  network_types        network_types?         @relation(fields: [network_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  zipcodes             zipcodes?              @relation(fields: [zipcode_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  checkins             checkins[]
+  favourite_station    favourite_station[]
+  station_review       station_review[]
+  trip_to_station_stop trip_to_station_stop[]
+  payment_methods      payment_methods[]      @relation("ChargingStationToPaymentMethod")
+
+  @@index([city_id, zipcode_id, network_type_id, facility_type_id, map_image_id, charger_id])
+}
+
+model checkins {
+  id                Int               @id @default(autoincrement())
+  user_id           Int
+  station_id        Int
+  created_at        DateTime?         @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?         @default(now()) @db.Timestamp(6)
+  type              String?
+  description       String?
+  charging_stations charging_stations @relation(fields: [station_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  master_user       master_user       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model cities {
+  id                Int                 @id @default(autoincrement())
+  state_id          Int?
+  city_name         String?             @db.VarChar(255)
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations[]
+  states            states?             @relation(fields: [state_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([state_id])
+}
+
+model countries {
+  id                Int                 @id @default(autoincrement())
+  country_name      String?             @db.VarChar(255)
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations[]
+  states            states[]
+}
+
+model facility_types {
+  id                Int                 @id @default(autoincrement())
+  facility_name     String?             @db.VarChar(255)
+  iconname          String?             @db.VarChar(50)
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations[]
+}
+
+model favourite_station {
+  id                Int               @id @default(autoincrement())
+  user_id           Int
+  station_id        Int
+  active_status     Boolean?          @default(false)
+  delete_status     Boolean?          @default(false)
+  created_at        DateTime?         @default(now())
+  updated_at        DateTime?         @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations @relation(fields: [station_id], references: [id])
+  master_user       master_user       @relation(fields: [user_id], references: [id])
+}
+
+model icon_types {
+  id                Int                 @id @default(autoincrement())
+  image             String?             @db.VarChar(255)
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations[]
+}
+
+model map_icon_types {
+  id                Int                 @id @default(autoincrement())
+  image             String?             @db.VarChar(255)
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations[]
+}
+
+model master_cms {
+  id                     Int       @id @default(autoincrement())
+  page_name              String?   @db.VarChar(255)
+  page_description       String?   @db.VarChar
+  page_short_description String?   @db.VarChar
+  meta_title             String?   @db.VarChar(255)
+  meta_keyword           String?   @db.VarChar(255)
+  meta_description       String?   @db.VarChar(255)
+  seo_url                String?   @db.VarChar(255)
+  banner_pic             String?   @db.VarChar(255)
+  active_status          Boolean?  @default(false)
+  delete_status          Boolean?  @default(false)
+  created_at             DateTime? @default(now())
+  updated_at             DateTime? @default(now())
+  deleted_at             DateTime?
+}
+
+model master_cms_contactus {
+  id            Int       @id @default(autoincrement())
+  user_id       Int?
+  name          String
+  email         String
+  message       String?
+  active_status Boolean?  @default(false)
+  delete_status Boolean?  @default(false)
+  created_at    DateTime? @default(now())
+  updated_at    DateTime? @default(now())
+  deleted_at    DateTime?
+}
+
+model master_user {
+  id                            Int                 @id @default(autoincrement())
+  name                          String?             @db.VarChar(255)
+  email                         String?             @db.VarChar(255)
+  newemail                      String?             @db.VarChar(255)
+  otp                           String?             @db.VarChar(20)
+  isNewEmailVerified            Boolean?            @default(false)
+  isEmailVerified               Boolean?
+  active_status                 Boolean?            @default(false)
+  delete_status                 Boolean?            @default(false)
+  created_at                    DateTime?           @default(now())
+  updated_at                    DateTime?           @default(now())
+  deleted_at                    DateTime?
+  zipcode_id                    Int?
+  profile_picture               String?
+  username                      String?
+  password                      String?
+  device_type                   String?
+  firebase_uid                  String?
+  push_token                    String?
+  vehicle_id                    Int?
+  terms_and_conditions_accepted Boolean?            @default(false)
+  profileImage                  String?             @db.VarChar(255)
+  phone                         String?             @db.VarChar(255)
+  checkins                      checkins[]
+  favourite_station             favourite_station[]
+  vehicles                      vehicles?           @relation(fields: [vehicle_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_vehicle")
+  zipcodes                      zipcodes?           @relation(fields: [zipcode_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  trip_to_station               trip_to_station[]
+}
+
+model network_types {
+  id                Int                 @id @default(autoincrement())
+  network_name      String?             @db.VarChar(255)
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  iconname          String?             @db.VarChar(255)
+  website           String?             @db.VarChar(255)
+  phone             String?             @db.VarChar(255)
+  charging_stations charging_stations[]
+}
+
+model payment_methods {
+  id                Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(255)
+  iconname          String?             @db.VarChar(50)
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations[] @relation("ChargingStationToPaymentMethod")
+}
+
+model plug_types {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(255)
+  iconname String @db.VarChar(255)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
+model states {
+  id         Int        @id @default(autoincrement())
+  country_id Int?
+  state_name String?    @db.VarChar(255)
+  created_at DateTime?  @default(now())
+  updated_at DateTime?  @default(now())
+  deleted_at DateTime?
+  cities     cities[]
+  countries  countries? @relation(fields: [country_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([country_id])
+}
+
+model station_review {
+  id                Int                @id @default(autoincrement())
+  review            String?            @db.VarChar(255)
+  station_id        Int?
+  created_at        DateTime?          @default(now())
+  updated_at        DateTime?          @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations? @relation(fields: [station_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([station_id])
+}
+
+model trip_to_station {
+  id                   Int                    @id @default(autoincrement())
+  user_id              Int?
+  origin_location      String?
+  destination_location String?
+  distance             String?
+  time_taken           String?
+  path                 String[]
+  active_status        Boolean?               @default(true)
+  delete_status        Boolean?               @default(false)
+  created_at           DateTime?              @default(now())
+  updated_at           DateTime?              @default(now())
+  deleted_at           DateTime?
+  master_user          master_user?           @relation(fields: [user_id], references: [id])
+  trip_to_station_stop trip_to_station_stop[]
+
+  @@index([user_id])
+}
+
+model trip_to_station_stop {
+  id                Int                @id @default(autoincrement())
+  station_id        Int?
+  trip_id           Int?
+  active_status     Boolean?           @default(true)
+  delete_status     Boolean?           @default(false)
+  created_at        DateTime?          @default(now())
+  updated_at        DateTime?          @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations? @relation(fields: [station_id], references: [id])
+  trip_to_station   trip_to_station?   @relation(fields: [trip_id], references: [id])
+
+  @@index([station_id, trip_id])
+}
+
+model us_gaz {
+  id        Int     @id(map: "pk_us_gaz") @default(autoincrement())
+  seq       Int?
+  word      String?
+  stdword   String?
+  token     Int?
+  is_custom Boolean @default(true)
+}
+
+model us_lex {
+  id        Int     @id(map: "pk_us_lex") @default(autoincrement())
+  seq       Int?
+  word      String?
+  stdword   String?
+  token     Int?
+  is_custom Boolean @default(true)
+}
+
+model us_rules {
+  id        Int     @id(map: "pk_us_rules") @default(autoincrement())
+  rule      String?
+  is_custom Boolean @default(true)
+}
+
+model vehicles {
+  id               Int           @id @default(autoincrement())
+  make             String?       @db.VarChar(255)
+  model            String?       @db.VarChar(255)
+  electric_range   String?       @db.VarChar(255)
+  vehicle_type     String?       @db.VarChar(255)
+  propulsion       String?       @db.VarChar(255)
+  drivetrain       String?       @db.VarChar(255)
+  fuel_efficiency  String?       @db.VarChar(255)
+  charging_rate    String?       @db.VarChar(255)
+  charging_speed   String?       @db.VarChar(255)
+  battery_capacity String?       @db.VarChar(255)
+  seats            String?       @db.VarChar(255)
+  base_msrp        String?       @db.VarChar(255)
+  master_user      master_user[]
+}
+
+model zipcodes {
+  id                Int                 @id @default(autoincrement())
+  zipcode           String?             @db.VarChar(255)
+  created_at        DateTime?           @default(now())
+  updated_at        DateTime?           @default(now())
+  deleted_at        DateTime?
+  charging_stations charging_stations[]
+  master_user       master_user[]
+}
